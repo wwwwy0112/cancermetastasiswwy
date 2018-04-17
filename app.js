@@ -126,7 +126,8 @@ app.get("/userquery", function(req, res) {
       var objlength = result.length;
       var keys = Object.keys(result[0]);
       var keylength = keys.length;
-      var queue = [];
+      
+      var sdarr = [];
       for(var i = 0; i < keylength; i++) {
         var avg = 0;
         for(var j = 0; j < objlength; j++) {
@@ -138,12 +139,14 @@ app.get("/userquery", function(req, res) {
           sumsq = sumsq + Math.pow(result[k][keys[i]] - avg, 2);
         }
         var sd = 1 / objlength * Math.sqrt(sumsq);
-        queue.push(sd);
+        sdarr.push([keys[i], sd]);
       }
-      //in order
-      res.send(queue);
+      sdarr.sort(function(a, b) {
+          return a[1] - b[1];
+      });
+      console.log(sdarr);
+      res.send(sdarr);
     });
-
     client.close();
   });
 })
