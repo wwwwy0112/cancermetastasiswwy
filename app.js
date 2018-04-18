@@ -139,10 +139,10 @@ app.get("/userquery", function(req, res) {
           sumsq = sumsq + Math.pow(result[k][keys[i]] - avg, 2);
         }
         var sd = 1 / objlength * Math.sqrt(sumsq);
-        sdarr.push([keys[i], sd]);
+        sdarr.push([{Name: keys[i], SD: sd});
       }
       sdarr.sort(function(a, b) {
-          return a[1] - b[1];
+          return a.SD - b.SD;
       });
       console.log(sdarr);
       res.send(sdarr);
