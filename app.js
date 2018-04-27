@@ -63,6 +63,70 @@ app.post("/insertmany", function(req, res) {
   })
 })
 
+app.get("/point", function(req, res) {
+  console.log("start finding data points");
+  var xgene = req.query.x_gene;
+  var ygene = req.query.y_gene;
+  
+  var target_name = req.query.name;
+  var target_age = req.query.age;
+  var target_gender = req.query.gender;
+  console.log("querying:  name: " + target_name + ", age: " + target_age + ", gender: " + target_gender);
+  MongoClient.connect(url, function(err, client) {
+    if (err) throw err;
+    console.log("connected to mongodb: querying");
+    var db = client.db(dbname);
+
+    // building query
+    var q = {};
+    q["$and"] = [];
+    if (target_name != undefined) {
+      q["$and"].push({name : target_name});
+    }
+    if (target_age != undefined) {
+      q["$and"].push({age: Number(target_age)});
+    }
+    if(target_gender == -1) {
+      q["$and"].push({gender: "f"});
+    }
+    else if (target_gender == 1) {
+      q["$and"].push({gender: "m"});
+    }
+    console.log(q);
+    var ids = {};
+    ids["$or"] = [];
+
+    db.collection("testdata").find(q).toArray(function(err, result) {
+    //db.collection("sample_annotations").find(q).toArray(function(err, result) {
+      if (err) throw err;
+      res.write("<h3>query results</h3>");
+      if (result.length > 0) {
+        console.log("valid query: " + result.length);
+        for (var n = 0; n < result.length; n++) {
+          ids["$or"].push({"Probe ID": result[n]["Array ID"]});
+          var key = Object.keys(result[n]);
+          for (var i = 1; i < key.length; i++) {
+            res.write("<p><b>" + key[i] + ":</b> " + result[n][key[i]] + "</p>");
+          }
+          res.write("<br>");
+        }
+        console.log("query successfully returned: ");
+        console.log(result);
+      }
+      else {
+        console.log("invalid");
+        res.write("zero entries matched.");
+      }
+      res.write("</body></html>");
+      //res.send(result[0][0]);
+    });
+    
+    var points = {};
+    db.collections("exprtable").find(ids).toArray(funtion(err, result) {
+      for(var i = 0; i < result.length; i++) {
+        
+  )}
+
 app.get("/userquery", function(req, res) {
   console.log("reading in queries: " + req.query);
   res.write("<!DOCTYPE html><html><body style='text-align:center'>");
